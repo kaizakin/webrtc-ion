@@ -13,10 +13,13 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/pion/mediadevices"
 	"github.com/pion/mediadevices/pkg/codec/vpx"
+
 	"github.com/pion/mediadevices/pkg/frame"
 	"github.com/pion/mediadevices/pkg/prop"
 	"github.com/pion/webrtc/v4"
 	"github.com/sourcegraph/jsonrpc2"
+	_ "github.com/pion/mediadevices/pkg/driver/camera"     // This is required to register camera adapter
+	_ "github.com/pion/mediadevices/pkg/driver/microphone" // This is required to register microphone adapter
 )
 
 type Candidate struct {
@@ -61,7 +64,7 @@ var remoteDescription *webrtc.SessionDescription
 
 
 func main(){
-	flag.StringVar(&addr, "a", "localhost:3000", "address to use")
+	flag.StringVar(&addr, "a", "localhost:7000", "address to use")
 	flag.Parse();
 
 	u := url.URL{Scheme: "ws", Host: addr, Path: "/ws"}
@@ -110,6 +113,9 @@ func main(){
 	done := make(chan struct{})
 
 	go readMessage(c, done)
+
+	fmt.Println(mediadevices.EnumerateDevices())
+
 
 	s, err := mediadevices.GetUserMedia(mediadevices.MediaStreamConstraints{
 		Video: func(mtc *mediadevices.MediaTrackConstraints) {
